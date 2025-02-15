@@ -1,12 +1,10 @@
 import asyncio
 import feedparser
 import schedule
-import time
 import requests
-from bs4 import BeautifulSoup
+import os
 from telegram import Bot, Update
 from telegram.ext import CommandHandler, Application
-import os
 
 # 🔹 Thông tin bot
 TOKEN = os.getenv("TOKEN")
@@ -17,6 +15,9 @@ RSS_URL = "https://dantri.com.vn/rss/home.rss"
 
 # 🔹 URL RSS về Đất Đai (Bất động sản)
 LAND_RSS_URL = "https://dantri.com.vn/rss/bat-dong-san.rss"
+
+# 🔹 API lấy giá vàng từ DOJI
+GOLD_API_URL = "https://www.doji.vn/api/data"
 
 # 🔹 Khởi tạo bot
 bot = Bot(token=TOKEN)
@@ -35,35 +36,24 @@ def get_land_news():
     news_text = "\n\n".join([f"🏡 {entry.title}\n🔗 {entry.link}" for entry in top_news])
     return news_text if news_text else "Không có tin tức đất đai mới."
 
-# 🔹 Hàm lấy giá vàng từ SJC
+# 🔹 Hàm lấy giá vàng từ API DOJI
 def get_gold_price():
-    url = "https://sjc.com.vn"
     headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
-    
+    response = requests.get(GOLD_API_URL, headers=headers)
+
     if response.status_code != 200:
         return "❌ Không thể lấy giá vàng."
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    table = soup.find("table", class_="table-responsive")
-
-    if not table:
+    try:
+        data = response.json()
+        sjc_price = data["GiaVang"]["data"]["SJC"]["Hồ Chí Minh"]
+        buy_price = sjc_price["buy"]
+        sell_price = sjc_price["sell"]
+        return f"🏙 **SJC HCM**\n💰 Mua: {buy_price} | Bán: {sell_price}"
+    except (KeyError, TypeError):
         return "❌ Không tìm thấy dữ liệu giá vàng."
 
-    rows = table.find_all("tr")[1:4]  # Lấy 3 dòng đầu tiên (SJC HCM, SJC Hà Nội,...)
-    gold_prices = "📢 **Cập nhật giá vàng SJC hôm nay:**\n"
-    
-    for row in rows:
-        cols = row.find_all("td")
-        if len(cols) >= 3:
-            location = cols[0].text.strip()
-            buy_price = cols[1].text.strip()
-            sell_price = cols[2].text.strip()
-            gold_prices += f"🏙 **{location}**\n💰 Mua: {buy_price} | Bán: {sell_price}\n\n"
-
-    return gold_prices.strip()
-
-# 🔹 Hàm gửi tin tức, giá vàng, đất đai vào Telegram
+# 🔹 Hàm gửi tin tức, giá vàng và đất đai vào Telegram
 async def send_news_and_gold():
     news = get_hot_news()
     gold_price = get_gold_price()
