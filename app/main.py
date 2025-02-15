@@ -95,6 +95,8 @@ if __name__ == "__main__":
 
     # Khởi tạo bot với menu
     app = Application.builder().token(TOKEN).build()
+
+    # Thêm lệnh xử lý vào bot
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("refresh", refresh))
 
@@ -114,6 +116,6 @@ if __name__ == "__main__":
 
     # Chạy bot và scheduler song song
     loop.create_task(set_bot_commands())  # Đặt menu
-    loop.create_task(run_scheduler())
-    loop.create_task(app.run_polling())
+    loop.create_task(run_scheduler())  # Chạy scheduler
+    loop.create_task(app.run_polling())  # Chạy bot
     loop.run_forever()
