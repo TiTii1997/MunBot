@@ -82,7 +82,7 @@ async def refresh(update: Update, context):
 # 🔹 Lên lịch gửi tin tự động
 schedule.every().day.at("08:00").do(lambda: asyncio.run(send_news_and_gold()))
 schedule.every().day.at("09:00").do(lambda: asyncio.run(send_news_and_gold()))  # Cập nhật giá vàng
-schedule.every().day.at("18:00").do(lambda: asyncio.run(send_news_and_gold()))
+schedule.every().day.at("21:30").do(lambda: asyncio.run(send_news_and_gold()))
 
 # 🔹 Chạy bot Telegram
 async def run_scheduler():
