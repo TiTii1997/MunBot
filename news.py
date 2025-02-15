@@ -6,10 +6,11 @@ import requests
 from bs4 import BeautifulSoup
 from telegram import Bot, Update
 from telegram.ext import CommandHandler, Application
+import os
 
 # 🔹 Thông tin bot
-TOKEN = "7083820450:AAFFVULwrc8G8tlxusH7qgL3JRxKx38pdHE"
-CHAT_ID = "5744373835"
+TOKEN = os.getenv("TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 # 🔹 URL RSS của Dân Trí (tin tức chung)
 RSS_URL = "https://dantri.com.vn/rss/home.rss"
