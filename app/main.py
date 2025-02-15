@@ -3,7 +3,7 @@ import feedparser
 import schedule
 import requests
 import os
-from telegram import Bot, Update
+from telegram import Bot, Update, BotCommand
 from telegram.ext import CommandHandler, Application
 
 # 🔹 Thông tin bot
@@ -98,6 +98,13 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("refresh", refresh))
 
+    # 🔹 Thêm menu lệnh
+    async def set_bot_commands():
+        await app.bot.set_my_commands([
+            BotCommand("start", "Xem giá vàng và hướng dẫn"),
+            BotCommand("refresh", "Cập nhật tin tức & giá vàng ngay")
+        ])
+
     # 🔹 FIX lỗi event loop
     try:
         loop = asyncio.get_running_loop()
@@ -106,6 +113,7 @@ if __name__ == "__main__":
         asyncio.set_event_loop(loop)
 
     # Chạy bot và scheduler song song
+    loop.create_task(set_bot_commands())  # Đặt menu
     loop.create_task(run_scheduler())
     loop.create_task(app.run_polling())
     loop.run_forever()
